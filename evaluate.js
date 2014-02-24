@@ -3,13 +3,14 @@
 //i am manipulating the string and using it in my while loop, rather than the Regex, 
 //because a string is not mutable and that way I can use it as the return value of all the opoerator functions 
 
+//Huge scope issue, where RegEx is being passed upward when I done want it to
 
 function match(RegEx, userInput){
 	var counter = 0;
 	var currentString = eval(RegEx,userInput);
 	while(currentString != undefined && currentString.length >0){
 		currentString = eval(RegEx, currentString);
-		console.log('current string: '+ currentString )
+		//console.log('current string: '+ currentString )
 		counter++;
 	}
 	//in the case of a RegEx ending star or a plus there may be left over Regex
@@ -45,20 +46,25 @@ function eval(RegEx, userInput){
 	return (operatation(RegEx, userInput));
 }
 
-
+// funfact: if you console log a string label with an array it flattens it
 function opLookup(operator){
 	switch(operator){
 		case '|':
 			return(function(RegEx, userInput){
+				//console.log(RegEx)
 				RegEx.splice(0,1);
+				//console.log(RegEx)
 				var orArgs = RegEx.splice(0,1);
-				//why is this doing this
-				var returnMe = eval(orArgs[0][0], userInput);
+				//there is an extra outer bracket and I cant figure it out
+				orArgs =orArgs[0]
+				//console.log(RegEx)
+				//there is an extra outer bracket and I cant figure it out
+				var returnMe = eval(orArgs, userInput);
 				if(returnMe != undefined){
 					return(returnMe);
 				
 				}else{
-					returnMe =eval(orArgs[0][1], userInput)
+					returnMe =eval(orArgs, userInput)
 					if(returnMe != undefined){
 						return(returnMe)
 					}else{
@@ -83,7 +89,6 @@ function opLookup(operator){
 		case undefined:
 			return(function(expression,userInput){
 				if(userInput != ""){
-						console.log('this is a test')
 					return undefined;
 				}
 			})
@@ -95,7 +100,6 @@ function opLookup(operator){
                 lit = RegEx.splice(0,1);
 				if(lit == current){
                     userInput = userInput.substring(1,userInput.length+1);
-                    console.log('this is the returned string: ' + userInput)
 					return userInput;
 				}else{
 					return undefined;
@@ -107,11 +111,12 @@ function opLookup(operator){
 
 
 //Test Stuff***
-match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'a');
-//match(['*',['k']], 'kkkkkkg');
-//match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'ad');
-//match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'adf');
-//match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'al');
+match(['|', [['a'],['b']],'|',[['c'],['d']] ] , 'a');
+match(['*',['k']], 'kkkkkk');
+match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'ad');
+match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'adf');
+match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'al');
+match(['|', ['|', [ ['a'],['b']],'|', [['c'],['d']] ]  ], 'c' );
 //
 
 
@@ -120,4 +125,8 @@ match(['|',[['a'],['b']],'|',[['c'],['d']]] , 'a');
 
 //need to turn the userRegEx value into a tree
 
+/*as far as I can tell is not a problem that i am exporting in this way rather than 
+* saying module.exports.match = match because match is the only exposed method
+*/
+module.exports = match;
 
